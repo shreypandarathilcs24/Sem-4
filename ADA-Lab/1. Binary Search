@@ -1,0 +1,20 @@
+int search(int* nums, int numsSize, int target) {
+    int begg = 0;
+    int end = numsSize - 1;
+
+    while (begg <= end) {
+        int mid = begg + (end - begg) / 2;  
+
+        if (nums[mid] == target) {
+            return mid;
+        }
+        else if (nums[mid] < target) {
+            begg = mid + 1;
+        }
+        else {
+            end = mid - 1;
+        }
+    }
+
+    return -1;      
+}
