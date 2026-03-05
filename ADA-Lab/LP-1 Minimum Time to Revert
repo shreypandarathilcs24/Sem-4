@@ -1,0 +1,38 @@
+#include <string.h>
+#include <stdlib.h>
+
+int minimumTimeToInitialState(char* word, int k) {
+    int n = strlen(word);
+
+    int *lps = (int*)malloc(sizeof(int) * n);
+    lps[0] = 0;
+
+    int len = 0;
+    for (int i = 1; i < n; ) {
+        if (word[i] == word[len]) {
+            len++;
+            lps[i] = len;
+            i++;
+        } 
+        else {
+            if (len != 0)
+                len = lps[len - 1];
+            else {
+                lps[i] = 0;
+                i++;
+            }
+        }
+    }
+
+    int border = lps[n - 1];
+
+    while (border > 0) {
+        int removed = n - border;
+        if (removed % k == 0)
+            return removed / k;
+
+        border = lps[border - 1];
+    }
+
+    return (n + k - 1) / k;
+}
