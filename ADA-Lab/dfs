@@ -1,0 +1,42 @@
+#include <stdlib.h>
+#include <string.h>
+
+void dfs(int node, int k, int mod, int* visited, char* ans, int* ans_len) {
+    for (int i = 0; i < k; i++) {
+        int edge = node * k + i; 
+        
+        if (!visited[edge]) {
+            visited[edge] = 1; 
+            
+            dfs(edge % mod, k, mod, visited, ans, ans_len);
+            
+            ans[(*ans_len)++] = i + '0';
+        }
+    }
+}
+
+char* crackSafe(int n, int k) {
+    int total_edges = 1;
+    for (int i = 0; i < n; i++) {
+        total_edges *= k;
+    }
+    
+    int mod = 1;
+    for (int i = 0; i < n - 1; i++) {
+        mod *= k;
+    }
+    
+    int* visited = (int*)calloc(total_edges, sizeof(int));
+    char* ans = (char*)malloc((total_edges + n) * sizeof(char));
+    int ans_len = 0;
+    
+    dfs(0, k, mod, visited, ans, &ans_len);
+    
+    for (int i = 0; i < n - 1; i++) {
+        ans[ans_len++] = '0';
+    }
+    ans[ans_len] = '\0'; 
+    
+    free(visited); 
+    return ans;
+}
