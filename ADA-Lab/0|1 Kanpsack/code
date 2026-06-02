@@ -1,0 +1,81 @@
+#include <stdio.h>
+
+struct item
+{
+    int profit;
+    int weight;
+    float ratio;
+};
+
+void sort(struct item arr[], int n)
+{
+    struct item temp;
+
+    for(int i = 0; i < n - 1; i++)
+    {
+        for(int j = i + 1; j < n; j++)
+        {
+            if(arr[i].ratio < arr[j].ratio)
+            {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+int main()
+{
+    int n, capacity;
+
+    printf("Enter number of items : ");
+    scanf("%d", &n);
+
+    printf("Enter capacity of knapsack : ");
+    scanf("%d", &capacity);
+
+    struct item arr[n];
+    float sel[n];
+    float tot_profit = 0;
+
+    for(int i = 0; i < n; i++)
+    {
+        sel[i] = 0;
+
+        printf("Enter weight of item %d : ", i + 1);
+        scanf("%d", &arr[i].weight);
+
+        printf("Enter profit of item %d : ", i + 1);
+        scanf("%d", &arr[i].profit);
+
+        arr[i].ratio = (float)arr[i].profit / arr[i].weight;
+    }
+
+    sort(arr, n);
+
+    for(int i = 0; i < n; i++)
+    {
+        if(capacity == 0)
+            break;
+
+        if(arr[i].weight <= capacity)
+        {
+            tot_profit += arr[i].profit;
+            capacity -= arr[i].weight;
+            sel[i] = 1;
+        }
+        else
+        {
+            tot_profit += arr[i].profit *
+                          ((float)capacity / arr[i].weight);
+
+            sel[i] = (float)capacity / arr[i].weight;
+            capacity = 0;
+        }
+    }
+
+    printf("Maximum Profit = %f\n", tot_profit);
+
+    return 0;
+}
