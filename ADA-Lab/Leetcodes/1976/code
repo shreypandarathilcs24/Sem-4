@@ -1,0 +1,69 @@
+#include <limits.h>
+
+#define MOD 1000000007
+typedef long long ll;
+
+int countPaths(int n, int** roads, int roadsSize, int* roadsColSize) {
+    
+    ll mat[201][201];
+
+    // initialize matrix
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            mat[i][j] = LLONG_MAX;
+        }
+    }
+
+    // fill roads
+    for (int i = 0; i < roadsSize; i++) {
+        int u = roads[i][0];
+        int v = roads[i][1];
+        int w = roads[i][2];
+        mat[u][v] = w;
+        mat[v][u] = w;
+    }
+
+    ll dist[201];
+    int ways[201];
+    int vis[201];
+
+    for (int i = 0; i < n; i++) {
+        dist[i] = LLONG_MAX;
+        ways[i] = 0;
+        vis[i] = 0;
+    }
+
+    dist[0] = 0;
+    ways[0] = 1;
+
+    for (int i = 0; i < n; i++) {
+
+        int u = -1;
+
+        // find min distance node
+        for (int j = 0; j < n; j++) {
+            if (!vis[j] && (u == -1 || dist[j] < dist[u])) {
+                u = j;
+            }
+        }
+
+        vis[u] = 1;
+
+        // relax edges
+        for (int v = 0; v < n; v++) {
+            if (mat[u][v] == LLONG_MAX) continue;
+
+            ll nd = dist[u] + mat[u][v];
+
+            if (nd < dist[v]) {
+                dist[v] = nd;
+                ways[v] = ways[u];
+            } 
+            else if (nd == dist[v]) {
+                ways[v] = (ways[v] + ways[u]) % MOD;
+            }
+        }
+    }
+
+    return ways[n - 1];
+}
