@@ -1,0 +1,58 @@
+#include <stdio.h>
+
+#define INF 999
+#define MAX 100
+
+int dist[MAX][MAX];
+int n;
+
+void floyd()
+{
+    for(int k = 0; k < n; k++)
+    {
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < n; j++)
+            {
+                if(dist[i][k] + dist[k][j] < dist[i][j])
+                {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    printf("Enter no. of vertices : ");
+    scanf("%d", &n);
+
+    printf("Enter adjacency matrix:\n");
+
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            scanf("%d", &dist[i][j]);
+        }
+    }
+
+    floyd();
+
+    printf("\nShortest Distance Matrix:\n");
+
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            if(dist[i][j] >= INF)
+                printf("INF ");
+            else
+                printf("%d ", dist[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
