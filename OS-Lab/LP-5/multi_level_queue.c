@@ -1,95 +1,91 @@
 #include <stdio.h>
 
-struct Process {
-    int pid;
-    int at;   // Arrival Time
-    int bt;   // Burst Time
-    int ct;   // Completion Time
-    int wt;   // Waiting Time
-    int tat;  // Turnaround Time
-    int type; // 0 = System, 1 = User
-    int done; // 0 = not done, 1 = completed
-};
-
 int main() {
-    int n, i, time = 0, completed = 0;
+    int n;
 
-    printf("Enter total number of processes: ");
+    printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    struct Process p[n];
+    int at[n], bt[n], ct[n], tat[n], wt[n];
+    int type[n], done[n];
 
-    // Input
-    for(i = 0; i < n; i++) {
-        printf("\nProcess %d\n", i+1);
-        p[i].pid = i + 1;
+    for(int i = 0; i < n; i++) {
+        printf("\nProcess P%d\n", i + 1);
 
-        printf("Enter Arrival Time: ");
-        scanf("%d", &p[i].at);
+        printf("Arrival Time: ");
+        scanf("%d", &at[i]);
 
-        printf("Enter Burst Time: ");
-        scanf("%d", &p[i].bt);
+        printf("Burst Time: ");
+        scanf("%d", &bt[i]);
 
-        printf("Enter Type (0 = System, 1 = User): ");
-        scanf("%d", &p[i].type);
+        printf("Type (0=System, 1=User): ");
+        scanf("%d", &type[i]);
 
-        p[i].done = 0;
+        done[i] = 0;
     }
 
-    // Scheduling
+    int time = 0, completed = 0;
+
     while(completed < n) {
+
         int idx = -1;
 
-        // Step 1: Check System processes first
-        for(i = 0; i < n; i++) {
-            if(p[i].at <= time && p[i].done == 0 && p[i].type == 0) {
+        // Check System processes first
+        for(int i = 0; i < n; i++) {
+            if(at[i] <= time && done[i] == 0 && type[i] == 0) {
                 idx = i;
-                break; // FCFS → first arrived
+                break;
             }
         }
 
-        // Step 2: If no system process, check user
+        // If no System process, check User process
         if(idx == -1) {
-            for(i = 0; i < n; i++) {
-                if(p[i].at <= time && p[i].done == 0 && p[i].type == 1) {
+            for(int i = 0; i < n; i++) {
+                if(at[i] <= time && done[i] == 0 && type[i] == 1) {
                     idx = i;
                     break;
                 }
             }
         }
 
-        // Step 3: If no process available → increment time
+        // No process has arrived yet
         if(idx == -1) {
             time++;
             continue;
         }
 
         // Execute process
-        time += p[idx].bt;
-        p[idx].ct = time;
-        p[idx].tat = p[idx].ct - p[idx].at;
-        p[idx].wt = p[idx].tat - p[idx].bt;
-        p[idx].done = 1;
+        time += bt[idx];
+
+        ct[idx] = time;
+        tat[idx] = ct[idx] - at[idx];
+        wt[idx] = tat[idx] - bt[idx];
+
+        done[idx] = 1;
         completed++;
     }
 
-    // Output
-    float avg_wt = 0, avg_tat = 0;
+    float avg_tat = 0, avg_wt = 0;
 
-    printf("\nPID\tAT\tBT\tType\tCT\tTAT\tWT\n");
+    printf("\nPID\tAT\tBT\tTYPE\tCT\tTAT\tWT\n");
 
-    for(i = 0; i < n; i++) {
-        printf("%d\t%d\t%d\t%s\t%d\t%d\t%d\n",
-            p[i].pid, p[i].at, p[i].bt,
-            (p[i].type == 0) ? "SYS" : "USR",
-            p[i].ct, p[i].tat, p[i].wt);
+    for(int i = 0; i < n; i++) {
 
-        avg_wt += p[i].wt;
-        avg_tat += p[i].tat;
+        printf("P%d\t%d\t%d\t%s\t%d\t%d\t%d\n",
+               i + 1,
+               at[i],
+               bt[i],
+               (type[i] == 0) ? "SYS" : "USR",
+               ct[i],
+               tat[i],
+               wt[i]);
+
+        avg_tat += tat[i];
+        avg_wt += wt[i];
     }
 
-    printf("\nAverage WT = %.2f", avg_wt / n);
-    printf("\nAverage TAT = %.2f\n", avg_tat / n);
+    printf("\nAverage TAT = %.2f", avg_tat / n);
+    printf("\nAverage WT = %.2f\n", avg_wt / n);
 
     return 0;
 }
