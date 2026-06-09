@@ -1,43 +1,59 @@
 #include <stdio.h>
-#include <math.h>
-
-struct Task {
-    int pid, ci, ti;
-    int remaining;
-};
 
 int main() {
-    int n;
-    float u = 0, bound;
+    int n, i, j, time, hyper = 1;
 
     printf("Enter number of tasks: ");
     scanf("%d", &n);
 
-    struct Task t[n];
+    int ci[n], ti[n], rt[n];
 
-    for (int i = 0; i < n; i++) {
-        t[i].pid = i + 1;
-
+    for(i = 0; i < n; i++) {
         printf("\nTask %d\n", i + 1);
+
         printf("Enter Capacity (Ci): ");
-        scanf("%d", &t[i].ci);
+        scanf("%d", &ci[i]);
 
         printf("Enter Period (Ti): ");
-        scanf("%d", &t[i].ti);
+        scanf("%d", &ti[i]);
 
-        t[i].remaining = t[i].ci;
-        u += (float)t[i].ci / t[i].ti;
+        rt[i] = ci[i];
     }
 
-    bound = n * (pow(2, (float)1/n) - 1);
+    /* Hyperperiod (simple product of periods) */
+    for(i = 0; i < n; i++)
+        hyper *= ti[i];
 
-    printf("\nCPU Utilization = %.4f\n", u);
-    printf("Bound = %.4f\n", bound);
+    printf("\nGantt Chart:\n|");
 
-    if (u <= bound)
-        printf("Schedulable using RMS\n");
-    else
-        printf("Scheduling not guaranteed\n");
+    for(time = 0; time < hyper; time++) {
+
+        /* Release tasks at beginning of each period */
+        for(i = 0; i < n; i++) {
+            if(time % ti[i] == 0)
+                rt[i] = ci[i];
+        }
+
+        int highest = -1;
+
+        /* RMS: smallest period = highest priority */
+        for(i = 0; i < n; i++) {
+            if(rt[i] > 0) {
+                if(highest == -1 || ti[i] < ti[highest])
+                    highest = i;
+            }
+        }
+
+        if(highest == -1) {
+            printf(" Idle |");
+        }
+        else {
+            printf(" T%d |", highest + 1);
+            rt[highest]--;
+        }
+    }
+
+    printf("\n");
 
     return 0;
 }
