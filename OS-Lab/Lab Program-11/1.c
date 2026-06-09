@@ -2,152 +2,160 @@
 
 #define MAX 50
 
-void print(int f[], int n) {
+int found(int f[], int n, int page)
+{
     for(int i=0;i<n;i++)
-        (f[i]==-1)? printf("- ") : printf("%d ", f[i]);
-    printf("\n");
-}
-
-int search(int f[], int n, int key) {
-    for(int i=0;i<n;i++)
-        if(f[i]==key) return i;
+        if(f[i]==page)
+            return i;
     return -1;
 }
 
 // FIFO
-void FIFO(int p[], int n, int fno) {
-    int f[MAX], faults=0, idx=0;
+void FIFO(int p[], int n, int frames)
+{
+    int f[MAX], faults=0, pos=0;
 
-    for(int i=0;i<fno;i++) f[i]=-1;
+    for(int i=0;i<frames;i++)
+        f[i]=-1;
 
-    printf("\nFIFO:\n");
-
-    for(int i=0;i<n;i++) {
-        if(search(f,fno,p[i])==-1) {
-            f[idx]=p[i];
-            idx=(idx+1)%fno;
+    for(int i=0;i<n;i++)
+    {
+        if(found(f,frames,p[i])==-1)
+        {
+            f[pos]=p[i];
+            pos=(pos+1)%frames;
             faults++;
-
-            printf("PF %d: ",faults);
-            print(f,fno);
         }
     }
-    printf("Total FIFO Faults = %d\n",faults);
+
+    printf("FIFO Faults = %d\n", faults);
 }
 
 // LRU
-void LRU(int p[], int n, int fno) {
-    int f[MAX], time[MAX], faults=0, cnt=0;
+void LRU(int p[], int n, int frames)
+{
+    int f[MAX], time[MAX];
+    int faults=0, cnt=0;
 
-    for(int i=0;i<fno;i++) {
+    for(int i=0;i<frames;i++)
+    {
         f[i]=-1;
         time[i]=0;
     }
 
-    printf("\nLRU:\n");
+    for(int i=0;i<n;i++)
+    {
+        int idx=found(f,frames,p[i]);
 
-    for(int i=0;i<n;i++) {
-        int pos=search(f,fno,p[i]);
-
-        if(pos!=-1) {
-            time[pos]=++cnt;
+        if(idx!=-1)
+        {
+            time[idx]=++cnt;
         }
-        else {
-            int lru=0;
+        else
+        {
+            int pos=0;
 
-            // find empty frame first
-            for(int j=0;j<fno;j++) {
-                if(f[j]==-1) {
-                    lru=j;
-                    goto replace;
+            for(int j=0;j<frames;j++)
+            {
+                if(f[j]==-1)
+                {
+                    pos=j;
+                    break;
                 }
+
+                if(time[j]<time[pos])
+                    pos=j;
             }
 
-            // find least recently used
-            for(int j=1;j<fno;j++)
-                if(time[j]<time[lru]) lru=j;
-
-replace:
-            f[lru]=p[i];
-            time[lru]=++cnt;
+            f[pos]=p[i];
+            time[pos]=++cnt;
             faults++;
-
-            printf("PF %d: ",faults);
-            print(f,fno);
         }
     }
-    printf("Total LRU Faults = %d\n",faults);
+
+    printf("LRU Faults = %d\n", faults);
 }
 
-// OPTIMAL helper
-int predict(int p[], int f[], int n, int idx, int fno) {
-    int far=-1, pos=0;
+// Optimal helper
+int predict(int p[], int f[], int n, int start, int frames)
+{
+    int pos=0, farthest=-1;
 
-    for(int i=0;i<fno;i++) {
+    for(int i=0;i<frames;i++)
+    {
         int j;
-        for(j=idx;j<n;j++) {
-            if(f[i]==p[j]) {
-                if(j>far) {
-                    far=j;
+
+        for(j=start;j<n;j++)
+        {
+            if(f[i]==p[j])
+            {
+                if(j>farthest)
+                {
+                    farthest=j;
                     pos=i;
                 }
                 break;
             }
         }
-        if(j==n) return i;
+
+        if(j==n)
+            return i;
     }
+
     return pos;
 }
 
 // OPTIMAL
-void OPT(int p[], int n, int fno) {
+void OPT(int p[], int n, int frames)
+{
     int f[MAX], faults=0;
 
-    for(int i=0;i<fno;i++) f[i]=-1;
+    for(int i=0;i<frames;i++)
+        f[i]=-1;
 
-    printf("\nOPTIMAL:\n");
-
-    for(int i=0;i<n;i++) {
-
-        if(search(f,fno,p[i])==-1) {
-
+    for(int i=0;i<n;i++)
+    {
+        if(found(f,frames,p[i])==-1)
+        {
             int pos=-1;
 
-            for(int j=0;j<fno;j++)
-                if(f[j]==-1) {
+            for(int j=0;j<frames;j++)
+            {
+                if(f[j]==-1)
+                {
                     pos=j;
                     break;
                 }
+            }
 
             if(pos==-1)
-                pos=predict(p,f,n,i+1,fno);
+                pos=predict(p,f,n,i+1,frames);
 
             f[pos]=p[i];
             faults++;
-
-            printf("PF %d: ",faults);
-            print(f,fno);
         }
     }
-    printf("Total OPT Faults = %d\n",faults);
+
+    printf("OPT Faults = %d\n", faults);
 }
 
-int main() {
-    int n,fno,p[MAX];
+int main()
+{
+    int n, frames, p[MAX];
 
-    printf("Frames: ");
-    scanf("%d",&fno);
+    printf("Enter number of frames: ");
+    scanf("%d",&frames);
 
-    printf("Length of reference string: ");
+    printf("Enter length of reference string: ");
     scanf("%d",&n);
 
     printf("Enter reference string: ");
     for(int i=0;i<n;i++)
         scanf("%d",&p[i]);
 
-    FIFO(p,n,fno);
-    LRU(p,n,fno);
-    OPT(p,n,fno);
+    FIFO(p,n,frames);
+    LRU(p,n,frames);
+    OPT(p,n,frames);
 
     return 0;
 }
