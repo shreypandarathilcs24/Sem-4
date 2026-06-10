@@ -1,81 +1,56 @@
 #include <stdio.h>
 
-struct item
+int max(int a, int b)
 {
-    int profit;
-    int weight;
-    float ratio;
-};
-
-void sort(struct item arr[], int n)
-{
-    struct item temp;
-
-    for(int i = 0; i < n - 1; i++)
-    {
-        for(int j = i + 1; j < n; j++)
-        {
-            if(arr[i].ratio < arr[j].ratio)
-            {
-                temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
-    }
+    if(a > b)
+        return a;
+    return b;
 }
 
 int main()
 {
-    int n, capacity;
+    int n, W;
 
-    printf("Enter number of items : ");
+    printf("Enter number of items: ");
     scanf("%d", &n);
 
-    printf("Enter capacity of knapsack : ");
-    scanf("%d", &capacity);
+    printf("Enter capacity of knapsack: ");
+    scanf("%d", &W);
 
-    struct item arr[n];
-    float sel[n];
-    float tot_profit = 0;
+    int wt[n], profit[n];
 
     for(int i = 0; i < n; i++)
     {
-        sel[i] = 0;
-
-        printf("Enter weight of item %d : ", i + 1);
-        scanf("%d", &arr[i].weight);
-
-        printf("Enter profit of item %d : ", i + 1);
-        scanf("%d", &arr[i].profit);
-
-        arr[i].ratio = (float)arr[i].profit / arr[i].weight;
+        printf("Enter weight and profit of item %d: ", i + 1);
+        scanf("%d %d", &wt[i], &profit[i]);
     }
 
-    sort(arr, n);
+    int dp[n + 1][W + 1];
 
-    for(int i = 0; i < n; i++)
+    // Build DP Table
+    for(int i = 0; i <= n; i++)
     {
-        if(capacity == 0)
-            break;
-
-        if(arr[i].weight <= capacity)
+        for(int w = 0; w <= W; w++)
         {
-            tot_profit += arr[i].profit;
-            capacity -= arr[i].weight;
-            sel[i] = 1;
-        }
-        else
-        {
-            tot_profit += arr[i].profit *
-                          ((float)capacity / arr[i].weight);
-
-            sel[i] = (float)capacity / arr[i].weight;
-            capacity = 0;
+            if(i == 0 || w == 0)
+            {
+                dp[i][w] = 0;
+            }
+            else if(wt[i - 1] <= w)
+            {
+                dp[i][w] = max(
+                    profit[i - 1] + dp[i - 1][w - wt[i - 1]],
+                    dp[i - 1][w]
+                );
+            }
+            else
+            {
+                dp[i][w] = dp[i - 1][w];
+            }
         }
     }
 
-    printf("Maximum Profit = %f\n", tot_profit);
+    printf("\nMaximum Profit = %d\n", dp[n][W]);
 
     return 0;
 }
