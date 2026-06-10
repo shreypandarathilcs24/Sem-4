@@ -1,0 +1,56 @@
+#include <stdio.h>
+
+struct Item
+{
+    int p, w;
+    float r;
+};
+
+int main()
+{
+    int n, cap;
+    float profit = 0;
+    struct Item a[20], temp;
+
+    printf("Enter number of items: ");
+    scanf("%d", &n);
+
+    printf("Enter capacity: ");
+    scanf("%d", &cap);
+
+    for(int i = 0; i < n; i++)
+    {
+        printf("Enter weight and profit: ");
+        scanf("%d%d", &a[i].w, &a[i].p);
+
+        a[i].r = (float)a[i].p / a[i].w;
+    }
+
+    // Sort by profit/weight ratio
+    for(int i = 0; i < n-1; i++)
+        for(int j = i+1; j < n; j++)
+            if(a[i].r < a[j].r)
+            {
+                temp = a[i];
+                a[i] = a[j];
+                a[j] = temp;
+            }
+
+    for(int i = 0; i < n && cap > 0; i++)
+    {
+        if(a[i].w <= cap)
+        {
+            profit += a[i].p;
+            cap -= a[i].w;
+        }
+        else
+        {
+            profit += a[i].p * ((float)cap / a[i].w);
+            break;
+        }
+    }
+
+    printf("Maximum Profit = %.2f", profit);
+
+    return 0;
+}
