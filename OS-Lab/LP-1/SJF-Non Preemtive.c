@@ -1,56 +1,55 @@
 #include <stdio.h>
 
-struct Process {
-    int pid, at, bt, ct, tat, wt, done;
-};
-
 int main() {
-    int n, completed = 0, time = 0, min_index;
+    int n, time = 0, completed = 0;
+
     printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    struct Process p[n];
+    int at[n], bt[n], ct[n], tat[n], wt[n], done[n];
 
     for(int i = 0; i < n; i++) {
-        p[i].pid = i + 1;
         printf("\nProcess %d\n", i + 1);
+
         printf("Arrival Time: ");
-        scanf("%d", &p[i].at);
+        scanf("%d", &at[i]);
+
         printf("Burst Time: ");
-        scanf("%d", &p[i].bt);
-        p[i].done = 0;
+        scanf("%d", &bt[i]);
+
+        done[i] = 0;
     }
 
-    while(completed != n) {
-        int min_bt = 9999;
-        min_index = -1;
+    while(completed < n) {
+        int s = -1;
 
         for(int i = 0; i < n; i++) {
-            if(p[i].at <= time && p[i].done == 0) {
-                if(p[i].bt < min_bt) {
-                    min_bt = p[i].bt;
-                    min_index = i;
-                }
+            if(at[i] <= time && done[i] == 0) {
+                if(s == -1 || bt[i] < bt[s])
+                    s = i;
             }
         }
 
-        if(min_index == -1) {
+        if(s == -1) {
             time++;
-        } else {
-            time += p[min_index].bt;
-            p[min_index].ct = time;
-            p[min_index].tat = p[min_index].ct - p[min_index].at;
-            p[min_index].wt = p[min_index].tat - p[min_index].bt;
-            p[min_index].done = 1;
+        }
+        else {
+            time += bt[s];
+
+            ct[s] = time;
+            tat[s] = ct[s] - at[s];
+            wt[s] = tat[s] - bt[s];
+
+            done[s] = 1;
             completed++;
         }
     }
 
     printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
+
     for(int i = 0; i < n; i++) {
         printf("%d\t%d\t%d\t%d\t%d\t%d\n",
-               p[i].pid, p[i].at, p[i].bt,
-               p[i].ct, p[i].tat, p[i].wt);
+               i + 1, at[i], bt[i], ct[i], tat[i], wt[i]);
     }
 
     return 0;
